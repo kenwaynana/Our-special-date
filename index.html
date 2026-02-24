@@ -11,21 +11,22 @@
 body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(to bottom right, #1a1a1a, #3b0a45);
-    color: #f8f8f8;
+    background: linear-gradient(to bottom right, #ffc0cb, #ff69b4);
+    color: #1a1a1a;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     text-align: center;
+    overflow: hidden;
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.3);
     padding: 50px;
     border-radius: 20px;
-    backdrop-filter: blur(15px);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
     max-width: 500px;
     position: relative;
     z-index: 1;
@@ -62,12 +63,12 @@ button {
 }
 
 .yes {
-    background: #e6b422;
-    color: #1a1a1a;
+    background: #ff69b4;
+    color: #fff;
 }
 
 .yes:hover {
-    background: #ffd700;
+    background: #ff1493;
     transform: scale(1.05);
 }
 
@@ -81,23 +82,33 @@ button {
     display: none;
     margin-top: 20px;
     font-size: 20px;
-    color: #ffd700;
+    color: #ff1493;
 }
 
 #musicNotice {
     position: fixed;
     top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.7);
+    right: 20px;
+    background: rgba(255,182,193,0.9);
     padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 18px;
-    color: #ffd700;
+    border-radius: 50px;
+    color: #1a1a1a;
+    font-weight: bold;
+    cursor: pointer;
     z-index: 999;
     display: none;
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.pulsing {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,182,193,0.7); }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255,182,193,0.7); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,182,193,0.7); }
 }
 
 footer {
@@ -105,6 +116,20 @@ footer {
     bottom: 20px;
     font-size: 12px;
     opacity: 0.6;
+}
+
+/* Floating hearts animation */
+.heart {
+    position: absolute;
+    font-size: 16px;
+    color: #ff1493;
+    animation: float 5s linear infinite;
+    user-select: none;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) translateX(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-600px) translateX(var(--x)) scale(1.2); opacity: 0; }
 }
 </style>
 </head>
@@ -129,55 +154,51 @@ footer {
 
 <footer>Made with love 💌</footer>
 
-<!-- Hidden background music -->
+<!-- Background music -->
 <audio id="bgMusic" loop>
-  <source src="https://drive.google.com/uc?export=download&id=1A_WS6pyRq5oX-KReaOsFNaM8otAsmfLH" type="audio/mp3">
-  Your browser does not support the audio element.
+  <source src="IndiaPt2.mp3" type="audio/mp3">
 </audio>
 
-<!-- Music notification -->
-<div id="musicNotice">🎵 Music playing</div>
+<!-- Music notice / play button -->
+<div id="musicNotice">🎵 Music Playing (Tap to Start)</div>
 
 <script>
 const music = document.getElementById("bgMusic");
 const notice = document.getElementById("musicNotice");
 
-// Function to show notification briefly
-function showMusicNotice() {
+// Try autoplay
+music.play().then(() => {
+    showNotice();
+    setTimeout(hideNotice, 2000);
+}).catch(() => {
+    // Mobile: show notice as button
+    showNotice();
+    notice.addEventListener("click", () => {
+        music.play();
+        hideNotice();
+    }, { once: true });
+});
+
+function showNotice() {
     notice.style.display = "block";
     notice.style.opacity = "1";
-    setTimeout(() => {
-        notice.style.opacity = "0";
-        setTimeout(() => { notice.style.display = "none"; }, 500);
-    }, 2000);
+    notice.classList.add("pulsing");
 }
 
-// Try auto-play immediately
-function startMusic() {
-    music.play().then(() => {
-        showMusicNotice();
-    }).catch(() => {
-        // If blocked, start on first tap
-        document.body.addEventListener('click', () => {
-            music.play();
-            showMusicNotice();
-        }, { once: true });
-    });
+function hideNotice() {
+    notice.style.opacity = "0";
+    setTimeout(() => { notice.style.display = "none"; }, 500);
 }
 
-// Start music on page load
-window.addEventListener('load', startMusic);
-
+// Card button functions
 function sayYes() {
     const date = document.getElementById("datePicker").value;
     const response = document.getElementById("response");
-
     if (date === "") {
         response.innerHTML = "Pick a date first, beautiful 😌";
         response.classList.remove("hidden");
         return;
     }
-
     response.innerHTML = "It's a date 💕 I’ll make " + date + " unforgettable.";
     response.classList.remove("hidden");
 }
@@ -188,6 +209,22 @@ function moveNo() {
     const y = Math.random() * 200 - 100;
     button.style.transform = `translate(${x}px, ${y}px)`;
 }
+
+// Floating hearts
+function createHeart() {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.style.left = Math.random() * window.innerWidth + "px";
+    heart.style.fontSize = (12 + Math.random()*24) + "px";
+    const drift = (Math.random() * 200 - 100) + "px";
+    heart.style.setProperty('--x', drift);
+    heart.innerText = "❤️ I love Raven";
+    document.body.appendChild(heart);
+    setTimeout(() => {
+        heart.remove();
+    }, 5000);
+}
+setInterval(createHeart, 500);
 </script>
 
 </body>
