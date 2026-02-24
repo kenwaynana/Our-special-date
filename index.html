@@ -119,9 +119,16 @@
 
 <script>
 const music = document.getElementById("bgMusic");
-document.body.addEventListener("click", () => {
-    music.play();
-}, { once: true });
+
+// Try to auto-play on page load
+window.addEventListener('load', () => {
+    music.play().catch(() => {
+        // If auto-play is blocked, wait for user click
+        document.body.addEventListener("click", () => {
+            music.play();
+        }, { once: true });
+    });
+});
 
 function sayYes() {
     const date = document.getElementById("datePicker").value;
