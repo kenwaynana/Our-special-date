@@ -84,20 +84,20 @@ button {
     color: #ffd700;
 }
 
-#clickOverlay {
+#musicNotice {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.85);
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 18px;
     color: #ffd700;
-    font-size: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    z-index: 9999;
-    text-align: center;
+    z-index: 999;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
 }
 
 footer {
@@ -109,14 +109,6 @@ footer {
 </style>
 </head>
 <body>
-
-<div id="clickOverlay">
-    Tap anywhere to start music 🎵
-</div>
-
-<audio id="bgMusic" loop>
-    <source src="https://drive.google.com/uc?export=download&id=1A_WS6pyRq5oX-KReaOsFNaM8otAsmfLH" type="audio/mp3">
-</audio>
 
 <div class="card">
     <h1>For My Favorite Person 💫</h1>
@@ -137,39 +129,55 @@ footer {
 
 <footer>Made with love 💌</footer>
 
+<!-- Hidden background music -->
+<audio id="bgMusic" loop>
+  <source src="https://drive.google.com/uc?export=download&id=1A_WS6pyRq5oX-KReaOsFNaM8otAsmfLH" type="audio/mp3">
+  Your browser does not support the audio element.
+</audio>
+
+<!-- Music notification -->
+<div id="musicNotice">🎵 Music playing</div>
+
 <script>
 const music = document.getElementById("bgMusic");
-const overlay = document.getElementById("clickOverlay");
+const notice = document.getElementById("musicNotice");
 
-// Auto-play attempt
-window.addEventListener('load', () => {
-    music.play().catch(() => {
-        // overlay stays visible if auto-play fails
-        overlay.style.display = 'flex';
+// Function to show notification briefly
+function showMusicNotice() {
+    notice.style.display = "block";
+    notice.style.opacity = "1";
+    setTimeout(() => {
+        notice.style.opacity = "0";
+        setTimeout(() => { notice.style.display = "none"; }, 500);
+    }, 2000);
+}
+
+// Try auto-play immediately
+function startMusic() {
+    music.play().then(() => {
+        showMusicNotice();
+    }).catch(() => {
+        // If blocked, start on first tap
+        document.body.addEventListener('click', () => {
+            music.play();
+            showMusicNotice();
+        }, { once: true });
     });
-});
+}
 
-// Click anywhere to start music
-overlay.addEventListener('click', () => {
-    music.play();
-    overlay.style.display = 'none'; // hide overlay
-});
-
-// Backup: also let clicking anywhere on the page remove overlay
-document.body.addEventListener('click', (e) => {
-    if (!overlay.contains(e.target)) return;
-    music.play();
-    overlay.style.display = 'none';
-}, { once: true });
+// Start music on page load
+window.addEventListener('load', startMusic);
 
 function sayYes() {
     const date = document.getElementById("datePicker").value;
     const response = document.getElementById("response");
+
     if (date === "") {
         response.innerHTML = "Pick a date first, beautiful 😌";
         response.classList.remove("hidden");
         return;
     }
+
     response.innerHTML = "It's a date 💕 I’ll make " + date + " unforgettable.";
     response.classList.remove("hidden");
 }
