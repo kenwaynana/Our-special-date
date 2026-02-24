@@ -8,112 +8,112 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300&display=swap" rel="stylesheet">
 
 <style>
-    body {
-        margin: 0;
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(to bottom right, #1a1a1a, #3b0a45);
-        color: #f8f8f8;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        text-align: center;
-    }
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to bottom right, #1a1a1a, #3b0a45);
+    color: #f8f8f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+}
 
-    .card {
-        background: rgba(255, 255, 255, 0.05);
-        padding: 50px;
-        border-radius: 20px;
-        backdrop-filter: blur(15px);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-        max-width: 500px;
-    }
+.card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 50px;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    max-width: 500px;
+    position: relative;
+    z-index: 1;
+}
 
-    h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 36px;
-        margin-bottom: 15px;
-    }
+h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    margin-bottom: 15px;
+}
 
-    p {
-        font-size: 18px;
-        margin-bottom: 25px;
-        line-height: 1.6;
-    }
+p {
+    font-size: 18px;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
 
-    input[type="date"] {
-        padding: 10px;
-        border-radius: 10px;
-        border: none;
-        font-size: 16px;
-        margin-bottom: 20px;
-    }
+input[type="date"] {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
 
-    button {
-        padding: 12px 25px;
-        font-size: 16px;
-        border-radius: 30px;
-        border: none;
-        cursor: pointer;
-        margin: 10px;
-        transition: 0.3s;
-    }
+button {
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+    transition: 0.3s;
+}
 
-    .yes {
-        background: #e6b422;
-        color: #1a1a1a;
-    }
+.yes {
+    background: #e6b422;
+    color: #1a1a1a;
+}
 
-    .yes:hover {
-        background: #ffd700;
-        transform: scale(1.05);
-    }
+.yes:hover {
+    background: #ffd700;
+    transform: scale(1.05);
+}
 
-    .no {
-        background: transparent;
-        border: 1px solid #fff;
-        color: #fff;
-    }
+.no {
+    background: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+}
 
-    .hidden {
-        display: none;
-        margin-top: 20px;
-        font-size: 20px;
-        color: #ffd700;
-    }
+.hidden {
+    display: none;
+    margin-top: 20px;
+    font-size: 20px;
+    color: #ffd700;
+}
 
-    #clickOverlay {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.85);
-        color: #ffd700;
-        font-size: 24px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        z-index: 9999;
-        text-align: center;
-    }
+#clickOverlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    color: #ffd700;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 9999;
+    text-align: center;
+}
 
-    footer {
-        position: absolute;
-        bottom: 20px;
-        font-size: 12px;
-        opacity: 0.6;
-    }
+footer {
+    position: absolute;
+    bottom: 20px;
+    font-size: 12px;
+    opacity: 0.6;
+}
 </style>
 </head>
 <body>
 
-<!-- Overlay for click-to-play if auto-play blocked -->
-<div id="clickOverlay" class="hidden">
+<div id="clickOverlay">
     Tap anywhere to start music 🎵
 </div>
 
-<!-- Background music -->
 <audio id="bgMusic" loop>
     <source src="https://drive.google.com/uc?export=download&id=1A_WS6pyRq5oX-KReaOsFNaM8otAsmfLH" type="audio/mp3">
 </audio>
@@ -141,34 +141,35 @@
 const music = document.getElementById("bgMusic");
 const overlay = document.getElementById("clickOverlay");
 
-// Function to try auto-play
-function tryPlay() {
-    music.play().then(() => {
-        overlay.classList.add("hidden"); // Hide overlay if music plays
-    }).catch(() => {
-        overlay.classList.remove("hidden"); // Show overlay if blocked
+// Auto-play attempt
+window.addEventListener('load', () => {
+    music.play().catch(() => {
+        // overlay stays visible if auto-play fails
+        overlay.style.display = 'flex';
     });
-}
+});
 
-// Try auto-play when page loads
-window.addEventListener('load', tryPlay);
-
-// Overlay click will start music
+// Click anywhere to start music
 overlay.addEventListener('click', () => {
     music.play();
-    overlay.classList.add("hidden");
+    overlay.style.display = 'none'; // hide overlay
 });
+
+// Backup: also let clicking anywhere on the page remove overlay
+document.body.addEventListener('click', (e) => {
+    if (!overlay.contains(e.target)) return;
+    music.play();
+    overlay.style.display = 'none';
+}, { once: true });
 
 function sayYes() {
     const date = document.getElementById("datePicker").value;
     const response = document.getElementById("response");
-
     if (date === "") {
         response.innerHTML = "Pick a date first, beautiful 😌";
         response.classList.remove("hidden");
         return;
     }
-
     response.innerHTML = "It's a date 💕 I’ll make " + date + " unforgettable.";
     response.classList.remove("hidden");
 }
